@@ -2,7 +2,7 @@ const { spawn } = require("child_process");
 
 // Define the command and arguments
 const cloudflaredCmd = "./cloudflared";
-const args = ["tunnel", "--url", "http://localhost:8000"];
+const args = ["tunnel", "--url", "http://localhost:7860"];
 
 // Spawn the cloudflared subprocess
 const cloudflaredProcess = spawn(cloudflaredCmd, args);
@@ -21,7 +21,7 @@ cloudflaredProcess.stdout.on("data", (data) => {
 // Handle standard error (stderr)
 cloudflaredProcess.stderr.on("data", (data) => {
   if (getUrl(data) != null && !isMessageSent) {
-    sendNotification(getUrl(data));
+    // sendNotification(getUrl(data));
     console.log(`cloudflared: ${getUrl(data)}`);
   }
 });
@@ -56,22 +56,22 @@ const getUrl = (data) => {
   return tunnelUrl;
 };
 
-const sendNotification = (message) => {
-  (async () => {
-    const fetch = await import("node-fetch").then((module) => module.default);
-    fetch("http://ntfy/tavern", {
-      method: "POST",
-      body: "The Tavern AI golabal link.",
-      headers: {
-        Priority: "urgent",
-        Actions: `view, Open Link, ${message}`,
-      },
-    })
-      .then(() => {
-        isMessageSent = true;
-      })
-      .catch((err) => {
-        console.error("err: " + err);
-      });
-  })();
-};
+// const sendNotification = (message) => {
+//   (async () => {
+//     const fetch = await import("node-fetch").then((module) => module.default);
+//     fetch("http://ntfy/tavern", {
+//       method: "POST",
+//       body: "The Tavern AI golabal link.",
+//       headers: {
+//         Priority: "urgent",
+//         Actions: `view, Open Link, ${message}`,
+//       },
+//     })
+//       .then(() => {
+//         isMessageSent = true;
+//       })
+//       .catch((err) => {
+//         console.error("err: " + err);
+//       });
+//   })();
+// };

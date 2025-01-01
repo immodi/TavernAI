@@ -10,19 +10,29 @@ const cloudflaredProcess = spawn(cloudflaredCmd, args);
 // This will store the tunnel URL
 let tunnelUrl = "";
 let isMessageSent = false;
+let outputBuffer = "";
 
 // Handle standard output (stdout)
 cloudflaredProcess.stdout.on("data", (data) => {
-  if (getUrl(data) != null) {
-    console.log(`cloudflared: ${getUrl(data)}`);
+  outputBuffer += data.toString();
+  const url = getUrl(outputBuffer);
+  if (url && !isMessageSent) {
+    tunnelUrl = url;
+    console.log(`cloudflared: ${url}`);
+    sendNotification(url);
+    isMessageSent = true;
   }
 });
 
 // Handle standard error (stderr)
 cloudflaredProcess.stderr.on("data", (data) => {
-  if (getUrl(data) != null && !isMessageSent) {
-    // sendNotification(getUrl(data));
-    console.log(`cloudflared: ${getUrl(data)}`);
+  outputBuffer += data.toString();
+  const url = getUrl(outputBuffer);
+  if (url && !isMessageSent) {
+    tunnelUrl = url;
+    console.log(`cloudflared: ${url}`);
+    sendNotification(url);
+    isMessageSent = true;
   }
 });
 
@@ -43,35 +53,26 @@ cloudflaredProcess.on("error", (err) => {
 
 const getUrl = (data) => {
   const urlRegex = /(https:\/\/[a-zA-Z0-9.-]+\.trycloudflare\.com)/;
-  const output = data.toString();
-
-  // Try to extract the tunnel URL from the output
-  const match = output.match(urlRegex);
-  if (match) {
-    tunnelUrl = match[1];
-  } else {
-    tunnelUrl = null;
-  }
-
-  return tunnelUrl;
+  const match = data.match(urlRegex);
+  return match ? match[1] : null;
 };
 
-// const sendNotification = (message) => {
-//   (async () => {
-//     const fetch = await import("node-fetch").then((module) => module.default);
-//     fetch("http://ntfy/tavern", {
-//       method: "POST",
-//       body: "The Tavern AI golabal link.",
-//       headers: {
-//         Priority: "urgent",
-//         Actions: `view, Open Link, ${message}`,
-//       },
-//     })
-//       .then(() => {
-//         isMessageSent = true;
-//       })
-//       .catch((err) => {
-//         console.error("err: " + err);
-//       });
-//   })();
-// };
+const sendNotification = (message) => {
+  (async () => {
+    const fetch = await import("node-fetch").then((module) => module.default);
+    fetch("http://ntfy/tavern", {
+      method: "POST",
+      body: `The Tavern AI global link: ${message}`,
+      headers: {
+        Priority: "urgent",
+        Actions: `view, Open Link, ${message}`,
+      },
+    })
+      .then(() => {
+        console.log("Notification sent successfully.");
+      })
+      .catch((err) => {
+        console.error("Failed to send notification:", err);
+      });
+  })();
+};

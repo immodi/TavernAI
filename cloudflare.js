@@ -10,29 +10,19 @@ const cloudflaredProcess = spawn(cloudflaredCmd, args);
 // This will store the tunnel URL
 let tunnelUrl = "";
 let isMessageSent = false;
-let outputBuffer = "";
 
 // Handle standard output (stdout)
 cloudflaredProcess.stdout.on("data", (data) => {
-  outputBuffer += data.toString();
-  const url = getUrl(outputBuffer);
-  if (url && !isMessageSent) {
-    tunnelUrl = url;
-    console.log(`cloudflared: ${url}`);
-    // sendNotification(url);
-    isMessageSent = true;
+  if (getUrl(data) != null) {
+    console.log(`cloudflared: ${getUrl(data)}`);
   }
 });
 
 // Handle standard error (stderr)
 cloudflaredProcess.stderr.on("data", (data) => {
-  outputBuffer += data.toString();
-  const url = getUrl(outputBuffer);
-  if (url && !isMessageSent) {
-    tunnelUrl = url;
-    console.log(`cloudflared: ${url}`);
-    // sendNotification(url);
-    isMessageSent = true;
+  if (getUrl(data) != null && !isMessageSent) {
+    // sendNotification(getUrl(data));
+    console.log(`cloudflared: ${getUrl(data)}`);
   }
 });
 
@@ -53,8 +43,17 @@ cloudflaredProcess.on("error", (err) => {
 
 const getUrl = (data) => {
   const urlRegex = /(https:\/\/[a-zA-Z0-9.-]+\.trycloudflare\.com)/;
-  const match = data.match(urlRegex);
-  return match ? match[1] : null;
+  const output = data.toString();
+
+  // Try to extract the tunnel URL from the output
+  const match = output.match(urlRegex);
+  if (match) {
+    tunnelUrl = match[1];
+  } else {
+    tunnelUrl = null;
+  }
+
+  return tunnelUrl;
 };
 
 // const sendNotification = (message) => {
@@ -62,17 +61,17 @@ const getUrl = (data) => {
 //     const fetch = await import("node-fetch").then((module) => module.default);
 //     fetch("http://ntfy/tavern", {
 //       method: "POST",
-//       body: `The Tavern AI global link: ${message}`,
+//       body: "The Tavern AI golabal link.",
 //       headers: {
 //         Priority: "urgent",
 //         Actions: `view, Open Link, ${message}`,
 //       },
 //     })
 //       .then(() => {
-//         console.log("Notification sent successfully.");
+//         isMessageSent = true;
 //       })
 //       .catch((err) => {
-//         console.error("Failed to send notification:", err);
+//         console.error("err: " + err);
 //       });
 //   })();
 // };

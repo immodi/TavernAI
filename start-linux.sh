@@ -22,4 +22,8 @@ fi
 npm i
 
 # Start the server
-node server.js
+node server.js &
+
+# Start cloudflare.js in the foreground
+node cloudflare.js
+

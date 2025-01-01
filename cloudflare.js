@@ -19,7 +19,7 @@ cloudflaredProcess.stdout.on("data", (data) => {
   if (url && !isMessageSent) {
     tunnelUrl = url;
     console.log(`cloudflared: ${url}`);
-    sendNotification(url);
+    // sendNotification(url);
     isMessageSent = true;
   }
 });
@@ -31,7 +31,7 @@ cloudflaredProcess.stderr.on("data", (data) => {
   if (url && !isMessageSent) {
     tunnelUrl = url;
     console.log(`cloudflared: ${url}`);
-    sendNotification(url);
+    // sendNotification(url);
     isMessageSent = true;
   }
 });
@@ -57,22 +57,22 @@ const getUrl = (data) => {
   return match ? match[1] : null;
 };
 
-const sendNotification = (message) => {
-  (async () => {
-    const fetch = await import("node-fetch").then((module) => module.default);
-    fetch("http://ntfy/tavern", {
-      method: "POST",
-      body: `The Tavern AI global link: ${message}`,
-      headers: {
-        Priority: "urgent",
-        Actions: `view, Open Link, ${message}`,
-      },
-    })
-      .then(() => {
-        console.log("Notification sent successfully.");
-      })
-      .catch((err) => {
-        console.error("Failed to send notification:", err);
-      });
-  })();
-};
+// const sendNotification = (message) => {
+//   (async () => {
+//     const fetch = await import("node-fetch").then((module) => module.default);
+//     fetch("http://ntfy/tavern", {
+//       method: "POST",
+//       body: `The Tavern AI global link: ${message}`,
+//       headers: {
+//         Priority: "urgent",
+//         Actions: `view, Open Link, ${message}`,
+//       },
+//     })
+//       .then(() => {
+//         console.log("Notification sent successfully.");
+//       })
+//       .catch((err) => {
+//         console.error("Failed to send notification:", err);
+//       });
+//   })();
+// };

@@ -1,5 +1,7 @@
 var express = require('express');
 var app = express();
+app.set('trust proxy', true);
+
 var fs = require('fs');
 const readline = require('readline');
 const open = require('open');
